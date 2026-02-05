@@ -4,26 +4,20 @@ import { Network } from '@/lib/config'
 
 export const mockBlueprintInfo: BlueprintInfo = {
   id: 'test-blueprint-id',
-  name: 'HathorDice',
+  name: 'TestContract',
   attributes: {
-    public_methods: ['place_bet', 'add_liquidity', 'remove_liquidity', 'claim_balance'],
+    public_methods: ['deposit', 'withdraw', 'get_balance'],
   },
 }
 
 export const mockContractStates: Record<string, ContractState> = {
   'contract-htr': {
     token_uid: '00',
-    max_bet_amount: 10000n,
-    house_edge_basis_points: 190,
-    random_bit_length: 16,
     available_tokens: 100000000n,
     total_liquidity_provided: 100000000n,
   },
   'contract-usdc': {
     token_uid: '01',
-    max_bet_amount: 5000n,
-    house_edge_basis_points: 250,
-    random_bit_length: 20,
     available_tokens: 50000000n,
     total_liquidity_provided: 50000000n,
   },
@@ -33,34 +27,34 @@ export const mockTransactions = [
   {
     tx_id: '0000000000000001',
     timestamp: Date.now() - 60000,
-    nc_method: 'place_bet',
+    nc_method: 'deposit',
     nc_caller: 'WYBwT3xLpDnHNtYZiU52oanupVeDKhAvNp',
     first_block: '0000000000000abc',
     is_voided: false,
     nc_args_decoded: {
-      threshold: 32768,
+      amount: 1000,
     },
     nc_events: [
       {
-        type: 'BetPlaced',
-        data: '{"user":"WYBwT3xLpDnHNtYZiU52oanupVeDKhAvNp","amount":1000,"threshold":32768,"result":12345,"won":true,"payout":1900}',
+        type: 'Deposit',
+        data: '{"user":"WYBwT3xLpDnHNtYZiU52oanupVeDKhAvNp","amount":1000}',
       },
     ],
   },
   {
     tx_id: '0000000000000002',
     timestamp: Date.now() - 120000,
-    nc_method: 'place_bet',
+    nc_method: 'withdraw',
     nc_caller: 'WYBwT3xLpDnHNtYZiU52oanupVeDKhAvNp',
     first_block: '0000000000000abd',
     is_voided: false,
     nc_args_decoded: {
-      threshold: 16384,
+      amount: 500,
     },
     nc_events: [
       {
-        type: 'BetPlaced',
-        data: '{"user":"WYBwT3xLpDnHNtYZiU52oanupVeDKhAvNp","amount":500,"threshold":16384,"result":50000,"won":false,"payout":0}',
+        type: 'Withdrawal',
+        data: '{"user":"WYBwT3xLpDnHNtYZiU52oanupVeDKhAvNp","amount":500}',
       },
     ],
   },
@@ -133,7 +127,7 @@ export class MockHathorCoreAPI {
       }
     }
 
-    if (method === 'calculate_address_maximum_liquidity_removal') {
+    if (method === 'get_balance') {
       return {
         calls: {
           [callKey]: {
@@ -150,20 +144,6 @@ export class MockHathorCoreAPI {
         },
       },
     }
-  }
-
-  async getMaximumLiquidityRemoval(contractId: string, callerAddress: string): Promise<bigint> {
-    const result = await this.callViewFunction(
-      contractId,
-      'calculate_address_maximum_liquidity_removal',
-      [callerAddress],
-      callerAddress
-    )
-    const callKey = Object.keys(result.calls)[0]
-    if (callKey && result.calls[callKey]?.value !== undefined) {
-      return BigInt(result.calls[callKey].value)
-    }
-    return 0n
   }
 
   async getClaimableBalance(contractId: string, callerAddress: string): Promise<bigint> {
@@ -194,7 +174,6 @@ export const mockHathorCoreAPIFactory = () => {
         getContractHistory: vi.fn().mockImplementation(instance.getContractHistory.bind(instance)),
         getTransaction: vi.fn().mockImplementation(instance.getTransaction.bind(instance)),
         callViewFunction: vi.fn().mockImplementation(instance.callViewFunction.bind(instance)),
-        getMaximumLiquidityRemoval: vi.fn().mockImplementation(instance.getMaximumLiquidityRemoval.bind(instance)),
         getClaimableBalance: vi.fn().mockImplementation(instance.getClaimableBalance.bind(instance)),
       }
     }),

@@ -1,8 +1,19 @@
 #!/bin/bash
 
-# Check if site and command parameters are provided
+# Deployment script for Hathor dApp
+# Usage: ./scripts/deploy.sh <site> <command> [aws_profile]
+#
+# Sites: staging, production
+# Commands: build, sync, clear_cache
+
 if [ -z "$1" ] || [ -z "$2" ]; then
   echo "Usage: $0 <site> <command> [aws_profile]"
+  echo ""
+  echo "Sites: staging, production"
+  echo "Commands: build, sync, clear_cache"
+  echo ""
+  echo "Example: $0 staging build"
+  echo "Example: $0 production sync my-aws-profile"
   exit 1
 fi
 
@@ -11,29 +22,33 @@ command=$2
 aws_profile=$3
 
 # Define environment variables for each site
+# NOTE: Update these values for your deployment
 case $site in
   staging)
     NEXT_PUBLIC_DEFAULT_NETWORK=testnet
     NEXT_PUBLIC_HATHOR_NODE_URL_TESTNET=https://node1.india.testnet.hathor.network/v1a
     NEXT_PUBLIC_HATHOR_NODE_URL_MAINNET=https://node1.mainnet.hathor.network/v1a
-    NEXT_PUBLIC_CONTRACT_IDS='["00000000361ec0406d90a5bb4c6c7330af5792178b86cfc353afd4e50a62b741", "00000000b275d12824faa41177c7087fbc516b6d1811f780291036056d2cf1b3"]'
+    NEXT_PUBLIC_CONTRACT_IDS_TESTNET='["your_staging_contract_id"]'
+    NEXT_PUBLIC_CONTRACT_IDS_MAINNET='[]'
     NEXT_PUBLIC_USE_MOCK_WALLET=false
-    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=8264fff563181da658ce64ee80e80458
-    S3_BUCKET=hathor-dice-staging
-    CLOUDFRONT_ID=E1TZZUU0BQC4B5
+    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
+    S3_BUCKET=your-staging-bucket
+    CLOUDFRONT_ID=your_staging_cloudfront_id
     ;;
   production)
     NEXT_PUBLIC_DEFAULT_NETWORK=mainnet
     NEXT_PUBLIC_HATHOR_NODE_URL_TESTNET=https://node1.india.testnet.hathor.network/v1a
     NEXT_PUBLIC_HATHOR_NODE_URL_MAINNET=https://node1.mainnet.hathor.network/v1a
-    NEXT_PUBLIC_CONTRACT_IDS='["0000000079862340c1f7822b81f58668e2a62c5f1b69d8d2e3b8fdf1855196c1"]'
+    NEXT_PUBLIC_CONTRACT_IDS_TESTNET='[]'
+    NEXT_PUBLIC_CONTRACT_IDS_MAINNET='["your_production_contract_id"]'
     NEXT_PUBLIC_USE_MOCK_WALLET=false
-    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=8264fff563181da658ce64ee80e80458
-    S3_BUCKET=hathor-dice-production
-    CLOUDFRONT_ID=E12SHKOWBW5QA4
+    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
+    S3_BUCKET=your-production-bucket
+    CLOUDFRONT_ID=your_production_cloudfront_id
     ;;
   *)
     echo "Unknown site: $site"
+    echo "Valid sites: staging, production"
     exit 1
     ;;
 esac
@@ -41,7 +56,8 @@ esac
 export NEXT_PUBLIC_DEFAULT_NETWORK
 export NEXT_PUBLIC_HATHOR_NODE_URL_TESTNET
 export NEXT_PUBLIC_HATHOR_NODE_URL_MAINNET
-export NEXT_PUBLIC_CONTRACT_IDS
+export NEXT_PUBLIC_CONTRACT_IDS_TESTNET
+export NEXT_PUBLIC_CONTRACT_IDS_MAINNET
 export NEXT_PUBLIC_USE_MOCK_WALLET
 export NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 export S3_BUCKET
@@ -51,11 +67,7 @@ case $command in
   build)
     echo "Building for site: $site"
     echo "NEXT_PUBLIC_DEFAULT_NETWORK: $NEXT_PUBLIC_DEFAULT_NETWORK"
-    echo "NEXT_PUBLIC_HATHOR_NODE_URL_TESTNET: $NEXT_PUBLIC_HATHOR_NODE_URL_TESTNET"
-    echo "NEXT_PUBLIC_HATHOR_NODE_URL_MAINNET: $NEXT_PUBLIC_HATHOR_NODE_URL_MAINNET"
-    echo "NEXT_PUBLIC_CONTRACT_IDS: $NEXT_PUBLIC_CONTRACT_IDS"
     echo "NEXT_PUBLIC_USE_MOCK_WALLET: $NEXT_PUBLIC_USE_MOCK_WALLET"
-    echo "NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: $NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID"
     # Use production config for static export
     cp next.config.js next.config.js.bak
     cp next.config.production.js next.config.js
@@ -86,6 +98,7 @@ case $command in
     ;;
   *)
     echo "Unknown command: $command"
+    echo "Valid commands: build, sync, clear_cache"
     exit 1
     ;;
 esac

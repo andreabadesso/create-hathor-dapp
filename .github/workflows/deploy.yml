@@ -60,7 +60,8 @@ jobs:
         with:
           site: staging
           aws-region: us-east-1
-          aws-role: arn:aws:iam::769498303037:role/HathorDiceGitHubActionsRoleStaging
+          # TODO: Update with your AWS IAM role ARN
+          aws-role: arn:aws:iam::YOUR_ACCOUNT_ID:role/YourGitHubActionsRoleStaging
 
   deploy-production:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -73,4 +74,5 @@ jobs:
         with:
           site: production
           aws-region: us-east-1
-          aws-role: arn:aws:iam::769498303037:role/HathorDiceGitHubActionsRoleProduction
+          # TODO: Update with your AWS IAM role ARN
+          aws-role: arn:aws:iam::YOUR_ACCOUNT_ID:role/YourGitHubActionsRoleProduction

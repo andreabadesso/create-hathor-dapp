@@ -50,7 +50,7 @@ describe('HathorRPCService', () => {
         address: 'WYBwT3xLpDnHNtYZiU52oanupVeDKhAvNp',
         nc_id: 'contract-id',
         nc_blueprint_id: 'blueprint-id',
-        nc_method: 'place_bet',
+        nc_method: 'deposit',
         nc_args: ['32768'],
         nc_actions: []
       })
@@ -220,7 +220,7 @@ describe('HathorRPCService', () => {
         address: 'WYBwT3xLpDnHNtYZiU52oanupVeDKhAvNp',
         nc_id: 'contract-id',
         nc_blueprint_id: 'blueprint-id',
-        nc_method: 'place_bet',
+        nc_method: 'deposit',
         nc_args: ['32768'],
         nc_actions: [
           {

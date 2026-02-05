@@ -26,9 +26,9 @@ describe('HathorCoreAPI', () => {
     it('should fetch blueprint info successfully', async () => {
       const mockBlueprint = {
         id: 'test-blueprint-id',
-        name: 'HathorDice',
+        name: 'TestContract',
         attributes: {
-          public_methods: ['place_bet', 'add_liquidity'],
+          public_methods: ['deposit', 'withdraw'],
         },
       }
 
@@ -62,9 +62,6 @@ describe('HathorCoreAPI', () => {
       const mockResponse = {
         fields: {
           token_uid: { value: '00' },
-          max_bet_amount: { value: 10000n },
-          house_edge_basis_points: { value: 190 },
-          random_bit_length: { value: 16 },
           available_tokens: { value: 100000000n },
           total_liquidity_provided: { value: 100000000n },
         },
@@ -77,12 +74,9 @@ describe('HathorCoreAPI', () => {
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/nano_contract/state?id=contract-id')
       )
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('fields[]=max_bet_amount')
-      )
       expect(result.token_uid).toBe('00')
-      expect(result.max_bet_amount).toBe(10000n)
-      expect(result.house_edge_basis_points).toBe(190)
+      expect(result.available_tokens).toBe(100000000n)
+      expect(result.total_liquidity_provided).toBe(100000000n)
     })
 
     it('should use default values when fields are missing', async () => {
@@ -95,10 +89,29 @@ describe('HathorCoreAPI', () => {
       const result = await api.getContractState('contract-id')
 
       expect(result.token_uid).toBe('00')
-      expect(result.max_bet_amount).toBe(0)
-      expect(result.house_edge_basis_points).toBe(200)
-      expect(result.random_bit_length).toBe(16)
-      expect(result.available_tokens).toBe(0)
+      expect(result.available_tokens).toBe(0n)
+      expect(result.total_liquidity_provided).toBe(0n)
+    })
+
+    it('should fetch custom fields when provided', async () => {
+      const mockResponse = {
+        fields: {
+          token_uid: { value: '00' },
+          custom_field: { value: 42 },
+        },
+      }
+
+      mockFetch.mockResolvedValueOnce(createMockResponse(mockResponse))
+
+      const result = await api.getContractState('contract-id', ['token_uid', 'custom_field'])
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('fields[]=token_uid')
+      )
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('fields[]=custom_field')
+      )
+      expect(result.custom_field).toBe(42)
     })
 
     it('should throw error on failed request', async () => {
@@ -117,14 +130,14 @@ describe('HathorCoreAPI', () => {
           {
             hash: '0000000000000001',
             timestamp: Date.now() - 60000,
-            nc_method: 'place_bet',
+            nc_method: 'deposit',
             nc_address: 'WYBwT3xLpDnHNtYZiU52oanupVeDKhAvNp',
             first_block: '0000000000000abc',
             is_voided: false,
-            nc_args_decoded: { threshold: 32768 },
+            nc_args_decoded: { amount: 1000 },
             nc_events: [
               {
-                type: 'BetPlaced',
+                type: 'Deposit',
                 data: '{"user":"WYBwT3xLpDnHNtYZiU52oanupVeDKhAvNp","amount":1000}',
               },
             ],
@@ -142,7 +155,7 @@ describe('HathorCoreAPI', () => {
       )
       expect(result.transactions).toHaveLength(1)
       expect(result.transactions[0].tx_id).toBe('0000000000000001')
-      expect(result.transactions[0].nc_method).toBe('place_bet')
+      expect(result.transactions[0].nc_method).toBe('deposit')
       expect(result.hasMore).toBe(false)
     })
 

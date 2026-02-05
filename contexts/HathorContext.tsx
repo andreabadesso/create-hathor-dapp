@@ -37,9 +37,6 @@ const tokenSymbolCache: Record<string, string> = {
 const MOCK_CONTRACT_STATES: Record<string, ContractState> = {
   'HTR': {
     token_uid: '00',
-    max_bet_amount: 10000n,
-    house_edge_basis_points: 190,
-    random_bit_length: 16,
     available_tokens: 100000000n,
     total_liquidity_provided: 100000000n,
   },

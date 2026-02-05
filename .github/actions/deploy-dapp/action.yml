@@ -1,5 +1,5 @@
-name: Deploy HathorDice dApp
-description: Build and deploy the HathorDice dApp to AWS S3/CloudFront
+name: Deploy Hathor dApp
+description: Build and deploy the Hathor dApp to AWS S3/CloudFront
 
 inputs:
   site:

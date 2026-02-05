@@ -16,22 +16,31 @@ export class HathorCoreAPI {
     return response.json();
   }
 
-  async getContractState(contractId: string): Promise<ContractState> {
-    const fields = ['max_bet_amount', 'token_uid', 'house_edge_basis_points', 'random_bit_length', 'available_tokens'];
+  async getContractState(contractId: string, fields: string[] = ['token_uid', 'available_tokens', 'total_liquidity_provided']): Promise<ContractState> {
     const queryString = fields.map(field => `fields[]=${field}`).join('&');
     const response = await fetch(`${this.baseUrl}/nano_contract/state?id=${contractId}&${queryString}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch contract state: ${response.statusText}`);
     }
     const data = await response.json();
-    return {
+
+    // Build state object from all returned fields
+    const state: ContractState = {
       token_uid: data.fields?.token_uid?.value || '00',
-      max_bet_amount: data.fields?.max_bet_amount?.value || 0,
-      house_edge_basis_points: data.fields?.house_edge_basis_points?.value || 200,
-      random_bit_length: data.fields?.random_bit_length?.value || 16,
-      available_tokens: data.fields?.available_tokens?.value || 0,
-      total_liquidity_provided: data.fields?.total_liquidity_provided?.value || 0,
+      available_tokens: BigInt(data.fields?.available_tokens?.value || 0),
+      total_liquidity_provided: BigInt(data.fields?.total_liquidity_provided?.value || 0),
     };
+
+    // Add any additional fields that were returned
+    if (data.fields) {
+      for (const [key, fieldData] of Object.entries(data.fields)) {
+        if (!(key in state) && fieldData && typeof fieldData === 'object' && 'value' in fieldData) {
+          state[key] = (fieldData as any).value;
+        }
+      }
+    }
+
+    return state;
   }
 
   async getContractHistory(contractId: string, limit: number = 50, after?: string): Promise<ContractHistory> {

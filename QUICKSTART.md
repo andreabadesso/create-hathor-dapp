@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-## Getting Started in 5 Minutes
+## Getting Started
 
 ### 1. Install Dependencies
 ```bash
@@ -28,24 +28,23 @@ With `NEXT_PUBLIC_USE_MOCK_WALLET=true` (default), you can:
 
 1. **Connect Wallet**: Click "Connect Wallet" and choose any option
 2. **View Mock Balance**: See simulated HTR balance
-3. **Place Bets**: Test the betting interface
-4. **View Contract Info**: See mock contract state
+3. **View Contract Info**: See mock contract state
 
 All actions are simulated and no real transactions occur.
 
 ## Connecting a Real Wallet
 
 ### Prerequisites
-- Hathor Wallet extension or Metamask with Hathor Snap
+- Hathor Wallet extension or MetaMask with Hathor Snap
 - HTR tokens on India Testnet
-- Deployed HathorDice contract
+- Deployed nano contract
 
 ### Steps
 
 1. **Update Environment**:
 ```env
 NEXT_PUBLIC_USE_MOCK_WALLET=false
-NEXT_PUBLIC_CONTRACT_IDS=["your_contract_id_here"]
+NEXT_PUBLIC_CONTRACT_IDS_TESTNET=["your_contract_id_here"]
 ```
 
 2. **Restart Server**:
@@ -55,31 +54,19 @@ npm run dev
 
 3. **Connect Wallet**:
    - Click "Connect Wallet"
-   - Choose Reown or Metamask Snaps
+   - Choose Reown or MetaMask Snaps
    - Approve connection in wallet
 
-4. **Place a Bet**:
-   - Enter bet amount
-   - Set win chance or threshold
-   - Review multiplier and payout
-   - Click "Place Bet"
-   - Confirm transaction in wallet
+4. **Interact with Contract**:
+   - Use the provided hooks and utilities
+   - Send transactions via `sendNanoContractTx`
+   - Confirm transactions in your wallet
 
 ## Network Selection
 
 Use the network selector in the top-right to switch between:
 - **India Testnet** (active)
 - **Mainnet** (coming soon)
-
-## Contract Information
-
-The Contract Information panel shows:
-- House Edge percentage
-- Maximum bet amount
-- Available liquidity
-- Total liquidity provided
-- Random bit length
-- Token UID
 
 ## Troubleshooting
 
@@ -89,7 +76,7 @@ The Contract Information panel shows:
 - Check that you're on the correct network
 
 ### "Contract state not loaded"
-- Verify `NEXT_PUBLIC_CONTRACT_IDS` is set correctly
+- Verify `NEXT_PUBLIC_CONTRACT_IDS_TESTNET` is set correctly
 - Check that the contract exists on the selected network
 - Ensure node URL is accessible
 
@@ -100,24 +87,17 @@ The Contract Information panel shows:
 
 ## Next Steps
 
-1. **Deploy Contract**: Deploy HathorDice to India Testnet
+1. **Deploy Contract**: Deploy your nano contract to India Testnet
 2. **Update Config**: Add contract ID to `.env.local`
-3. **Test Features**: Try all game actions
-4. **Customize**: Modify UI and add features
+3. **Build Your dApp**: Modify the template to add your features
 
 ## Development Tips
 
 - Use mock mode for rapid UI development
-- Test calculations with different contract parameters
 - Monitor browser console for errors
 - Use React DevTools to inspect component state
 
 ## Support
 
 - Check [README.md](./README.md) for detailed documentation
-- Review [INTEGRATION.md](./INTEGRATION.md) for technical details
 - Open an issue on GitHub for bugs or questions
-
----
-
-Happy betting! 🎲
