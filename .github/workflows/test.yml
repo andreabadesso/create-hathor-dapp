@@ -38,9 +38,6 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
 
-      # Coverage thresholds are enforced in vitest.config.ts
-      # The test:coverage command will fail if thresholds are not met
-
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
