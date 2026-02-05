@@ -1,0 +1,71 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="diceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6B46C1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06B6D4;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#6B46C1;stop-opacity:0.6" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#6B46C1" flood-opacity="0.5"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with glow -->
+  <circle cx="100" cy="100" r="95" fill="url(#glowGradient)" opacity="0.2" filter="url(#glow)"/>
+  
+  <!-- Main dice body -->
+  <g filter="url(#shadow)">
+    <!-- Front face -->
+    <path d="M 60 80 L 140 80 L 140 160 L 60 160 Z" fill="url(#diceGradient)" stroke="#FFFFFF" stroke-width="2"/>
+    
+    <!-- Top face (3D effect) -->
+    <path d="M 60 80 L 100 50 L 180 50 L 140 80 Z" fill="#7C3AED" opacity="0.8" stroke="#FFFFFF" stroke-width="2"/>
+    
+    <!-- Right face (3D effect) -->
+    <path d="M 140 80 L 180 50 L 180 130 L 140 160 Z" fill="#5B21B6" opacity="0.6" stroke="#FFFFFF" stroke-width="2"/>
+    
+    <!-- Dots on front face (5 dots pattern) -->
+    <circle cx="80" cy="100" r="6" fill="#FFFFFF"/>
+    <circle cx="120" cy="100" r="6" fill="#FFFFFF"/>
+    <circle cx="80" cy="140" r="6" fill="#FFFFFF"/>
+    <circle cx="120" cy="140" r="6" fill="#FFFFFF"/>
+    <circle cx="100" cy="120" r="6" fill="#FFFFFF"/>
+    
+    <!-- Dots on top face (3 dots pattern) -->
+    <circle cx="110" cy="58" r="4" fill="#FFFFFF" opacity="0.9"/>
+    <circle cx="130" cy="58" r="4" fill="#FFFFFF" opacity="0.9"/>
+    <circle cx="150" cy="58" r="4" fill="#FFFFFF" opacity="0.9"/>
+    
+    <!-- Dots on right face (4 dots pattern) -->
+    <circle cx="155" cy="75" r="4" fill="#FFFFFF" opacity="0.7"/>
+    <circle cx="165" cy="75" r="4" fill="#FFFFFF" opacity="0.7"/>
+    <circle cx="155" cy="105" r="4" fill="#FFFFFF" opacity="0.7"/>
+    <circle cx="165" cy="105" r="4" fill="#FFFFFF" opacity="0.7"/>
+  </g>
+  
+  <!-- Blockchain connection lines -->
+  <g opacity="0.4" stroke="#06B6D4" stroke-width="2" fill="none">
+    <line x1="30" y1="100" x2="60" y2="100"/>
+    <line x1="140" y1="100" x2="170" y2="100"/>
+    <circle cx="25" cy="100" r="5" fill="#06B6D4"/>
+    <circle cx="175" cy="100" r="5" fill="#06B6D4"/>
+  </g>
+  
+  <!-- Accent sparkles -->
+  <g fill="#F59E0B" opacity="0.8">
+    <circle cx="40" cy="60" r="3"/>
+    <circle cx="160" cy="140" r="3"/>
+    <circle cx="50" cy="150" r="2"/>
+    <circle cx="150" cy="70" r="2"/>
+  </g>
+</svg>

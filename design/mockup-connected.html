@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HathorDice - Wallet Connected</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: #FFFFFF;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container { display: flex; flex-direction: column; height: 100vh; }
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 30px; background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px); border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .logo { display: flex; align-items: center; gap: 15px; }
+        .dice-icon {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, #6B46C1 0%, #7C3AED 100%);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 32px; box-shadow: 0 4px 20px rgba(107, 70, 193, 0.4);
+        }
+        .logo-text h1 { font-size: 24px; font-weight: 700; letter-spacing: 1px; }
+        .logo-text p { font-size: 14px; color: #94A3B8; font-weight: 300; }
+        .wallet-info { display: flex; align-items: center; gap: 15px; }
+        .wallet-address {
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'JetBrains Mono', monospace; font-size: 14px;
+        }
+        .status-dot {
+            width: 10px; height: 10px; background: #10B981;
+            border-radius: 50%; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .disconnect-btn {
+            padding: 8px 16px; background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 6px;
+            color: #EF4444; font-size: 12px; cursor: pointer; transition: all 0.3s;
+        }
+        .disconnect-btn:hover { background: rgba(239, 68, 68, 0.3); }
+        .main-content { display: flex; flex: 1; overflow: hidden; }
+        .left-panel { flex: 2; display: flex; flex-direction: column; padding: 30px; overflow: hidden; }
+        .right-panel {
+            flex: 1; background: rgba(15, 23, 42, 0.6);
+            border-left: 1px solid rgba(148, 163, 184, 0.2);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .balance-card {
+            background: linear-gradient(135deg, rgba(107, 70, 193, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+            border: 1px solid rgba(107, 70, 193, 0.4); border-radius: 16px;
+            padding: 25px; margin-bottom: 20px; backdrop-filter: blur(10px);
+        }
+        .balance-header {
+            font-size: 18px; font-weight: 600; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .balance-row {
+            display: flex; justify-content: space-between;
+            margin-bottom: 10px; font-size: 15px;
+        }
+        .balance-label { color: #94A3B8; }
+        .balance-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600; font-size: 16px;
+        }
+        .balance-divider {
+            height: 1px; background: rgba(148, 163, 184, 0.3); margin: 12px 0;
+        }
+        .total-balance { font-size: 18px; color: #10B981; }
+        .card {
+            background: rgba(30, 41, 59, 0.8); border-radius: 16px;
+            padding: 25px; flex: 1; display: flex; flex-direction: column;
+            overflow: hidden; backdrop-filter: blur(10px);
+        }
+        .card-header {
+            font-size: 18px; font-weight: 600; margin-bottom: 15px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .table-wrapper { flex: 1; overflow-y: auto; overflow-x: hidden; }
+        .table-wrapper::-webkit-scrollbar { width: 8px; }
+        .table-wrapper::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4); border-radius: 4px;
+        }
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(107, 70, 193, 0.6); border-radius: 4px;
+        }
+        .recent-bets-table { width: 100%; border-collapse: collapse; }
+        .recent-bets-table th {
+            text-align: left; padding: 12px; color: #94A3B8; font-weight: 500;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            position: sticky; top: 0; background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .recent-bets-table td {
+            padding: 12px; border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        .win { color: #10B981; }
+        .lose { color: #EF4444; }
+        .your-bet { font-weight: 600; color: #F59E0B; }
+        .new-badge {
+            background: #10B981; color: #FFFFFF; padding: 2px 8px;
+            border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 8px;
+        }
+        .actions-header {
+            padding: 25px 25px 20px 25px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .actions-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; }
+        .token-selector-wrapper { margin-bottom: 15px; }
+        .token-label {
+            display: block; margin-bottom: 8px; color: #94A3B8; font-size: 13px;
+        }
+        .token-selector {
+            width: 100%; padding: 12px 15px; background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 8px;
+            color: #FFFFFF; font-size: 15px; cursor: pointer; transition: all 0.3s;
+        }
+        .token-selector:hover { border-color: #6B46C1; }
+        .actions-list { flex: 1; overflow-y: auto; padding: 20px 25px; }
+        .actions-list::-webkit-scrollbar { width: 8px; }
+        .actions-list::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4); border-radius: 4px;
+        }
+        .actions-list::-webkit-scrollbar-thumb {
+            background: rgba(107, 70, 193, 0.6); border-radius: 4px;
+        }
+        .action-card {
+            background: rgba(30, 41, 59, 0.6); border-radius: 12px;
+            margin-bottom: 15px; overflow: hidden; transition: all 0.3s;
+        }
+        .action-header {
+            padding: 15px 20px; font-size: 16px; font-weight: 600;
+            cursor: pointer; display: flex; justify-content: space-between;
+            align-items: center; transition: all 0.3s;
+        }
+        .action-header:hover { background: rgba(107, 70, 193, 0.2); }
+        .action-icon { transition: transform 0.3s; }
+        .action-card.collapsed .action-icon { transform: rotate(-90deg); }
+        .action-content {
+            padding: 0 20px 20px 20px; max-height: 1000px;
+            overflow: hidden; transition: all 0.3s ease-out;
+        }
+        .action-card.collapsed .action-content {
+            max-height: 0; padding: 0 20px;
+        }
+        .input-group { margin-bottom: 15px; }
+        .input-label {
+            display: block; margin-bottom: 8px; color: #94A3B8; font-size: 13px;
+        }
+        .input-wrapper { position: relative; display: flex; gap: 8px; align-items: center; }
+        .input-field {
+            flex: 1; padding: 12px; padding-right: 50px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 8px;
+            color: #FFFFFF; font-size: 15px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .input-field:focus { outline: none; border-color: #6B46C1; }
+        .input-unit {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            color: #94A3B8; font-size: 13px; pointer-events: none;
+        }
+        .quick-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        .quick-btn {
+            padding: 6px 10px; background: rgba(107, 70, 193, 0.2);
+            border: 1px solid #6B46C1; border-radius: 6px;
+            color: #FFFFFF; font-size: 11px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s; white-space: nowrap;
+        }
+        .quick-btn:hover { background: rgba(107, 70, 193, 0.4); }
+        .toggle-group { display: flex; gap: 15px; margin-bottom: 15px; }
+        .toggle-option {
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; font-size: 13px;
+        }
+        .toggle-option input[type="radio"] { width: 16px; height: 16px; cursor: pointer; }
+        .slider-container { margin: 10px 0; }
+        .slider {
+            width: 100%; height: 6px; background: rgba(148, 163, 184, 0.2);
+            border-radius: 3px; position: relative; cursor: pointer;
+        }
+        .slider-fill {
+            height: 100%; background: linear-gradient(90deg, #6B46C1 0%, #7C3AED 100%);
+            border-radius: 3px; width: 50%; transition: width 0.2s;
+        }
+        .slider-labels {
+            display: flex; justify-content: space-between;
+            font-size: 11px; color: #94A3B8; margin-top: 5px;
+        }
+        .stats-box {
+            background: rgba(107, 70, 193, 0.1);
+            border: 1px solid rgba(107, 70, 193, 0.3);
+            border-radius: 8px; padding: 12px; margin-bottom: 15px;
+        }
+        .stat-row {
+            display: flex; justify-content: space-between;
+            margin-bottom: 6px; font-size: 13px;
+        }
+        .stat-row:last-child { margin-bottom: 0; }
+        .stat-label { color: #94A3B8; }
+        .stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .action-btn {
+            width: 100%; padding: 12px;
+            background: linear-gradient(135deg, #6B46C1 0%, #7C3AED 100%);
+            border: none; border-radius: 8px; color: #FFFFFF;
+            font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(107, 70, 193, 0.4);
+        }
+        .available-text {
+            font-size: 11px; color: #94A3B8; margin-top: 5px;
+        }
+        .info-text {
+            font-size: 12px; color: #94A3B8; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .advanced-section {
+            padding: 20px 25px; border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        footer {
+            text-align: center; padding: 15px; color: #94A3B8;
+            font-size: 12px; border-top: 1px solid rgba(148, 163, 184, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="dice-icon">🎲</div>
+                <div class="logo-text">
+                    <h1>HATHOR DICE</h1>
+                    <p>Provably Fair Betting</p>
+                </div>
+            </div>
+            <div class="wallet-info">
+                <div class="wallet-address">
+                    <span class="status-dot"></span>
+                    <span>0x7a3f...9b2c</span>
+                </div>
+                <button class="disconnect-btn">Disconnect</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="balance-card">
+                    <div class="balance-header">💰 YOUR BALANCE</div>
+                    <div class="balance-row">
+                        <span class="balance-label">Wallet Balance:</span>
+                        <span class="balance-value" id="walletBalance">1,250.50 HTR</span>
+                    </div>
+                    <div class="balance-row">
+                        <span class="balance-label">Contract Balance:</span>
+                        <span class="balance-value" id="contractBalance">342.75 HTR</span>
+                    </div>
+                    <div class="balance-divider"></div>
+                    <div class="balance-row">
+                        <span class="balance-label">Available to Bet:</span>
+                        <span class="balance-value total-balance" id="totalBalance">1,593.25 HTR</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">📊 RECENT BETS</div>
+                    <div class="table-wrapper">
+                        <table class="recent-bets-table">
+                            <thead>
+                                <tr>
+                                    <th>Player</th>
+                                    <th>Bet</th>
+                                    <th>Threshold</th>
+                                    <th>Result</th>
+                                    <th>Payout</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="your-bet">YOU <span class="new-badge">NEW</span></td>
+                                    <td>100 HTR</td>
+                                    <td>32,768</td>
+                                    <td class="win">✅ WIN</td>
+                                    <td class="win">195.31 HTR</td>
+                                </tr>
+                                <tr>
+                                    <td>0x9f2...</td>
+                                    <td>50 HTR</td>
+                                    <td>16,384</td>
+                                    <td class="lose">❌ LOSE</td>
+                                    <td class="lose">0 HTR</td>
+                                </tr>
+                                <tr>
+                                    <td class="your-bet">YOU</td>
+                                    <td>200 HTR</td>
+                                    <td>49,152</td>
+                                    <td class="win">✅ WIN</td>
+                                    <td class="win">266.24 HTR</td>
+                                </tr>
+                                <tr>
+                                    <td>0x1c5...</td>
+                                    <td>75 HTR</td>
+                                    <td>8,192</td>
+                                    <td class="lose">❌ LOSE</td>
+                                    <td class="lose">0 HTR</td>
+                                </tr>
+                                <tr>
+                                    <td>0x6d9...</td>
+                                    <td>150 HTR</td>
+                                    <td>40,960</td>
+                                    <td class="win">✅ WIN</td>
+                                    <td class="win">239.06 HTR</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="actions-header">
+                    <div class="actions-title">🎮 GAME ACTIONS</div>
+                    <div class="token-selector-wrapper">
+                        <label class="token-label">Select Token</label>
+                        <select class="token-selector" id="tokenSelector">
+                            <option value="HTR">HTR</option>
+                            <option value="USDC">USDC</option>
+                            <option value="custom">Custom...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="actions-list">
+                    <div class="action-card" id="placeBetCard">
+                        <div class="action-header" onclick="toggleAction('placeBetCard')">
+                            <span>🎲 PLACE A BET</span>
+                            <span class="action-icon">▼</span>
+                        </div>
+                        <div class="action-content">
+                            <div class="input-group">
+                                <label class="input-label">Bet Amount</label>
+                                <div class="input-wrapper">
+                                    <input type="number" class="input-field" id="betAmount" value="100" min="0" step="0.01">
+                                    <span class="input-unit" id="betUnit">HTR</span>
+                                </div>
+                                <div class="quick-btns">
+                                    <button class="quick-btn" onclick="setQuickAmount(0.25)">25%</button>
+                                    <button class="quick-btn" onclick="setQuickAmount(0.5)">50%</button>
+                                    <button class="quick-btn" onclick="setQuickAmount(0.75)">75%</button>
+                                    <button class="quick-btn" onclick="setQuickAmount(1)">MAX</button>
+                                </div>
+                            </div>
+
+                            <div class="toggle-group">
+                                <label class="toggle-option">
+                                    <input type="radio" name="bet-mode" value="threshold" onchange="toggleBetMode()">
+                                    <span>Set Threshold</span>
+                                </label>
+                                <label class="toggle-option">
+                                    <input type="radio" name="bet-mode" value="chance" checked onchange="toggleBetMode()">
+                                    <span>Set Win Chance</span>
+                                </label>
+                            </div>
+
+                            <div class="input-group" id="chanceGroup">
+                                <label class="input-label">Win Chance (%)</label>
+                                <div class="input-wrapper">
+                                    <input type="number" class="input-field" id="winChance" value="50" min="0.001" max="99.999" step="0.001" oninput="updateFromChance()">
+                                    <span class="input-unit">%</span>
+                                </div>
+                                <div class="slider-container">
+                                    <div class="slider" onclick="updateSlider(event)">
+                                        <div class="slider-fill" id="sliderFill"></div>
+                                    </div>
+                                    <div class="slider-labels">
+                                        <span>0%</span>
+                                        <span>100%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="input-group" id="thresholdGroup" style="display: none;">
+                                <label class="input-label">Threshold (1-65,535)</label>
+                                <div class="input-wrapper">
+                                    <input type="number" class="input-field" id="threshold" value="32768" min="1" max="65535" step="1" oninput="updateFromThreshold()">
+                                </div>
+                            </div>
+
+                            <div class="stats-box">
+                                <div class="stat-row">
+                                    <span class="stat-label">📊 Threshold:</span>
+                                    <span class="stat-value" id="displayThreshold">32,768</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">💰 Multiplier:</span>
+                                    <span class="stat-value" id="displayMultiplier">1.96x</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">🎯 Potential Payout:</span>
+                                    <span class="stat-value" id="displayPayout">196.00 HTR</span>
+                                </div>
+                            </div>
+
+                            <button class="action-btn">🎲 Place Bet</button>
+                        </div>
+                    </div>
+
+                    <div class="action-card collapsed" id="addLiquidityCard">
+                        <div class="action-header" onclick="toggleAction('addLiquidityCard')">
+                            <span>💧 ADD LIQUIDITY</span>
+                            <span class="action-icon">▼</span>
+                        </div>
+                        <div class="action-content">
+                            <div class="input-group">
+                                <label class="input-label">Amount</label>
+                                <div class="input-wrapper">
+                                    <input type="number" class="input-field" id="liquidityAmount" value="500" min="0" step="0.01">
+                                    <span class="input-unit" id="liquidityUnit">HTR</span>
+                                </div>
+                                <div class="quick-btns">
+                                    <button class="quick-btn" onclick="setLiquidityAmount(0.25)">25%</button>
+                                    <button class="quick-btn" onclick="setLiquidityAmount(0.5)">50%</button>
+                                    <button class="quick-btn" onclick="setLiquidityAmount(0.75)">75%</button>
+                                    <button class="quick-btn" onclick="setLiquidityAmount(1)">MAX</button>
+                                </div>
+                            </div>
+                            <div class="info-text">ℹ️ Earn fees from house edge (2%)</div>
+                            <button class="action-btn">💧 Add Liquidity</button>
+                        </div>
+                    </div>
+
+                    <div class="action-card collapsed" id="removeLiquidityCard">
+                        <div class="action-header" onclick="toggleAction('removeLiquidityCard')">
+                            <span>💸 REMOVE LIQUIDITY</span>
+                            <span class="action-icon">▼</span>
+                        </div>
+                        <div class="action-content">
+                            <div class="input-group">
+                                <label class="input-label">Amount</label>
+                                <div class="input-wrapper">
+                                    <input type="number" class="input-field" id="removeLiquidityAmount" value="0" min="0" step="0.01">
+                                    <span class="input-unit" id="removeLiquidityUnit">HTR</span>
+                                </div>
+                                <div class="quick-btns">
+                                    <button class="quick-btn" onclick="setRemoveLiquidityMax()">MAX</button>
+                                </div>
+                                <div class="available-text">Available: 0 HTR</div>
+                            </div>
+                            <button class="action-btn">💸 Remove Liquidity</button>
+                        </div>
+                    </div>
+
+                    <div class="action-card collapsed" id="withdrawCard">
+                        <div class="action-header" onclick="toggleAction('withdrawCard')">
+                            <span>🏦 WITHDRAW BALANCE</span>
+                            <span class="action-icon">▼</span>
+                        </div>
+                        <div class="action-content">
+                            <div class="input-group">
+                                <label class="input-label">Amount</label>
+                                <div class="input-wrapper">
+                                    <input type="number" class="input-field" id="withdrawAmount" value="342.75" min="0" step="0.01">
+                                    <span class="input-unit" id="withdrawUnit">HTR</span>
+                                </div>
+                                <div class="quick-btns">
+                                    <button class="quick-btn" onclick="setWithdrawMax()">MAX</button>
+                                </div>
+                                <div class="available-text">Available: 342.75 HTR</div>
+                            </div>
+                            <button class="action-btn">🏦 Withdraw</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="advanced-section">
+                    <label class="input-label">Custom Contract Address (optional)</label>
+                    <input type="text" class="input-field" placeholder="0x..." style="font-size: 12px;">
+                </div>
+
+                <footer>Built on Hathor Network • Powered by Nano Contracts</footer>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const HOUSE_EDGE = 0.02;
+        let currentToken = 'HTR';
+        const walletBalance = 1250.50;
+        const contractBalance = 342.75;
+        const totalBalance = walletBalance + contractBalance;
+
+        function toggleAction(cardId) {
+            const card = document.getElementById(cardId);
+            const allCards = document.querySelectorAll('.action-card');
+            allCards.forEach(c => { if (c.id !== cardId) c.classList.add('collapsed'); });
+            card.classList.toggle('collapsed');
+        }
+
+        function toggleBetMode() {
+            const mode = document.querySelector('input[name="bet-mode"]:checked').value;
+            const chanceGroup = document.getElementById('chanceGroup');
+            const thresholdGroup = document.getElementById('thresholdGroup');
+            if (mode === 'chance') {
+                chanceGroup.style.display = 'block';
+                thresholdGroup.style.display = 'none';
+                updateFromChance();
+            } else {
+                chanceGroup.style.display = 'none';
+                thresholdGroup.style.display = 'block';
+                updateFromThreshold();
+            }
+        }
+
+        function updateFromChance() {
+            const winChance = parseFloat(document.getElementById('winChance').value) || 0;
+            const threshold = Math.floor(winChance * 65536 / 100);
+            document.getElementById('threshold').value = threshold;
+            updateCalculations(threshold);
+            updateSliderPosition(winChance);
+        }
+
+        function updateFromThreshold() {
+            const threshold = parseInt(document.getElementById('threshold').value) || 1;
+            const winChance = (threshold / 65536) * 100;
+            document.getElementById('winChance').value = winChance.toFixed(3);
+            updateCalculations(threshold);
+            updateSliderPosition(winChance);
+        }
+
+        function updateCalculations(threshold) {
+            const betAmount = parseFloat(document.getElementById('betAmount').value) || 0;
+            const multiplier = (65536 / threshold) * (1 - HOUSE_EDGE);
+            const payout = betAmount * multiplier;
+            document.getElementById('displayThreshold').textContent = threshold.toLocaleString();
+            document.getElementById('displayMultiplier').textContent = multiplier.toFixed(2) + 'x';
+            document.getElementById('displayPayout').textContent = payout.toFixed(2) + ' ' + currentToken;
+        }
+
+        function updateSliderPosition(winChance) {
+            document.getElementById('sliderFill').style.width = winChance + '%';
+        }
+
+        function updateSlider(event) {
+            const slider = event.currentTarget;
+            const rect = slider.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const percentage = (x / rect.width) * 100;
+            const winChance = Math.max(0.001, Math.min(99.999, percentage));
+            document.getElementById('winChance').value = winChance.toFixed(3);
+            updateFromChance();
+        }
+
+        function setQuickAmount(percentage) {
+            const amount = totalBalance * percentage;
+            document.getElementById('betAmount').value = amount.toFixed(2);
+            const mode = document.querySelector('input[name="bet-mode"]:checked').value;
+            if (mode === 'chance') updateFromChance(); else updateFromThreshold();
+        }
+
+        function setLiquidityAmount(percentage) {
+            const amount = totalBalance * percentage;
+            document.getElementById('liquidityAmount').value = amount.toFixed(2);
+        }
+
+        function setRemoveLiquidityMax() {
+            document.getElementById('removeLiquidityAmount').value = '0';
+        }
+
+        function setWithdrawMax() {
+            document.getElementById('withdrawAmount').value = contractBalance.toFixed(2);
+        }
+
+        document.getElementById('betAmount').addEventListener('input', function() {
+            const mode = document.querySelector('input[name="bet-mode"]:checked').value;
+            if (mode === 'chance') updateFromChance(); else updateFromThreshold();
+        });
+
+        document.getElementById('tokenSelector').addEventListener('change', function() {
+            currentToken = this.value;
+            document.getElementById('betUnit').textContent = currentToken;
+            document.getElementById('liquidityUnit').textContent = currentToken;
+            document.getElementById('removeLiquidityUnit').textContent = currentToken;
+            document.getElementById('withdrawUnit').textContent = currentToken;
+            document.getElementById('walletBalance').textContent = walletBalance.toFixed(2) + ' ' + currentToken;
+            document.getElementById('contractBalance').textContent = contractBalance.toFixed(2) + ' ' + currentToken;
+            document.getElementById('totalBalance').textContent = totalBalance.toFixed(2) + ' ' + currentToken;
+            const mode = document.querySelector('input[name="bet-mode"]:checked').value;
+            if (mode === 'chance') updateFromChance(); else updateFromThreshold();
+        });
+
+        updateFromChance();
+    </script>
+</body>
+</html>
