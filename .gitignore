@@ -1,14 +1,4 @@
-node_modules
-.next
-out
-dist
-build
-.DS_Store
-*.log
+node_modules/
 .env*.local
-.vercel
-*.tsbuildinfo
-next-env.d.ts
-coverage/
-playwright-report/
-test-results/
+*.tgz
+test-output/
